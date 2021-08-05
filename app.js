@@ -1,6 +1,7 @@
 const express = require("express");
 const config = require("config");
 const mongoose = require("mongoose");
+const path = require("path");
 
 // инициализация сервера express
 const app = express();
@@ -13,6 +14,15 @@ app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/link", require("./routes/link.routes"));
 // обработка сокрашенной ссылки
 app.use("/t", require("./routes/redirect.routes"));
+
+// для удаленного сервера что бы на нем разворачивать фронтенд
+if (process.env.NODE_ENV === "production") {
+  app.use("/", express.static(path.join(__dirname, "client", "build")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+  });
+}
 
 // Берем порт с default.json
 const PORT = config.get("port") || 5000;
